@@ -24,18 +24,25 @@
 
 package com.cloudogu.sonar;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
+import com.cloudogu.scm.ci.PermissionCheck;
+import com.cloudogu.scm.ci.cistatus.CIStatusStore;
+import com.cloudogu.scm.ci.cistatus.service.CIStatus;
+import com.cloudogu.scm.ci.cistatus.service.CIStatusService;
+import sonia.scm.repository.Repository;
 
-@Path("v2/sample")
-class SampleResource {
+import javax.inject.Inject;
 
-  @GET
-  @Produces(MediaType.TEXT_PLAIN)
-  public String sample() {
-    return "Sample";
+public class SonarService {
+
+  private final CIStatusService service;
+
+  @Inject
+  public SonarService(CIStatusService service) {
+    this.service = service;
   }
 
+  void updateCiStatus(Repository repository, String changesetId, CIStatus ciStatus) {
+    PermissionCheck.checkWrite(repository);
+    service.put(CIStatusStore.CHANGESET_STORE, repository, changesetId, ciStatus);
+  }
 }
