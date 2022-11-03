@@ -24,12 +24,16 @@
 
 package com.cloudogu.sonar;
 
-import com.cloudogu.scm.ci.cistatus.service.CIStatus;
-import com.cloudogu.scm.ci.cistatus.service.Status;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import sonia.scm.NotFoundException;
+import sonia.scm.api.v2.resources.ErrorDto;
 import sonia.scm.repository.NamespaceAndName;
 import sonia.scm.repository.Repository;
 import sonia.scm.repository.RepositoryManager;
+import sonia.scm.web.VndMediaType;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
@@ -55,26 +59,27 @@ public class SonarResource {
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
   @Path("{namespace}/{name}")
+  @Operation(
+    summary = "Update sonar ci status",
+    description = "Updates single sonar ci status.",
+    tags = "Sonar Plugin",
+    operationId = "sonar_put_status"
+  )
+  @ApiResponse(responseCode = "204", description = "update success")
+  @ApiResponse(responseCode = "401", description = "not authenticated / invalid credentials")
+  @ApiResponse(responseCode = "403", description = "not authorized /  the current user does not have the \"writeCIStatus\" privilege")
+  @ApiResponse(
+    responseCode = "500",
+    description = "internal server error",
+    content = @Content(
+      mediaType = VndMediaType.ERROR_TYPE,
+      schema = @Schema(implementation = ErrorDto.class)
+    )
+  )
   public Response processAnalysis(@PathParam("namespace") String namespace, @PathParam("name") String name, @Valid SonarAnalysisResultDto resultDto) {
     Repository repository = findRepository(namespace, name);
-    service.updateCiStatus(
-      repository,
-      resultDto.getRevision(),
-      new CIStatus("sonar", "sonar", "Sonar", resolveStatus(resultDto.getStatus()), resultDto.getProject().getUrl())
-    );
+    service.updateCiStatus(repository, resultDto);
     return Response.ok().build();
-  }
-
-  private Status resolveStatus(String status) {
-    switch (status) {
-      case "SUCCESS":
-        return Status.SUCCESS;
-      case "FAILED":
-        return Status.FAILURE;
-
-      default:
-        return Status.UNSTABLE;
-    }
   }
 
   private Repository findRepository(String namespace, String name) {
@@ -84,5 +89,4 @@ public class SonarResource {
     }
     return repository;
   }
-
 }

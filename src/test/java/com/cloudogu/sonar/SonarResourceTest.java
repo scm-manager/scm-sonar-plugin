@@ -94,11 +94,9 @@ class SonarResourceTest {
       MockHttpRequest
         .post("/v2/sonar/hitchhiker/42puzzle/")
         .content(("{\n" +
-          "    \"status\": \"SUCCESS\",\n" +
+          "    \"qualityGate\": { \"status\":\"SUCCESS\" },\n" +
           "    \"revision\": \"c739069ec7105e01303e8b3065a81141aad9f129\",\n" +
           "    \"project\": {\n" +
-          "        \"key\": \"myproject\",\n" +
-          "        \"name\": \"My Project\",\n" +
           "        \"url\": \"https://scm-manager.org/sonarqube/dashboard?id=myproject\"\n" +
           "    }\n" +
           "}").getBytes())
@@ -108,12 +106,10 @@ class SonarResourceTest {
     dispatcher.invoke(request, response);
 
     assertThat(response.getStatus()).isEqualTo(200);
-    verify(service).updateCiStatus(eq(repository), eq("c739069ec7105e01303e8b3065a81141aad9f129"), argThat(ci -> {
-      assertThat(ci.getType()).isEqualTo("sonar");
-      assertThat(ci.getName()).isEqualTo("sonar");
-      assertThat(ci.getDisplayName()).isEqualTo("Sonar");
-      assertThat(ci.getUrl()).isEqualTo("https://scm-manager.org/sonarqube/dashboard?id=myproject");
-      assertThat(ci.getStatus()).isEqualTo(Status.SUCCESS);
+    verify(service).updateCiStatus(eq(repository), argThat(dto -> {
+      assertThat(dto.getRevision()).isEqualTo("c739069ec7105e01303e8b3065a81141aad9f129");
+      assertThat(dto.getQualityGate().getStatus()).isEqualTo("SUCCESS");
+      assertThat(dto.getProject().getUrl()).isEqualTo("https://scm-manager.org/sonarqube/dashboard?id=myproject");
       return true;
     }));
   }

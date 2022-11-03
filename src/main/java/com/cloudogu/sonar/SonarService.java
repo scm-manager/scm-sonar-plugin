@@ -28,11 +28,14 @@ import com.cloudogu.scm.ci.PermissionCheck;
 import com.cloudogu.scm.ci.cistatus.CIStatusStore;
 import com.cloudogu.scm.ci.cistatus.service.CIStatus;
 import com.cloudogu.scm.ci.cistatus.service.CIStatusService;
+import com.cloudogu.scm.ci.cistatus.service.Status;
 import sonia.scm.repository.Repository;
 
 import javax.inject.Inject;
 
 public class SonarService {
+
+  private static final String NAME = "Sonar";
 
   private final CIStatusService service;
 
@@ -41,8 +44,24 @@ public class SonarService {
     this.service = service;
   }
 
-  void updateCiStatus(Repository repository, String changesetId, CIStatus ciStatus) {
+  void updateCiStatus(Repository repository, SonarAnalysisResultDto resultDto) {
     PermissionCheck.checkWrite(repository);
-    service.put(CIStatusStore.CHANGESET_STORE, repository, changesetId, ciStatus);
+    service.put(CIStatusStore.CHANGESET_STORE, repository, resultDto.getRevision(), createCIStatus(resultDto));
+  }
+
+  private CIStatus createCIStatus(SonarAnalysisResultDto dto) {
+    return new CIStatus(NAME, NAME, NAME, resolveStatus(dto.getQualityGate().getStatus()), dto.getProject().getUrl());
+  }
+
+  private Status resolveStatus(String status) {
+    switch (status) {
+      case "SUCCESS":
+        return Status.SUCCESS;
+      case "ERROR":
+        return Status.FAILURE;
+
+      default:
+        return Status.UNSTABLE;
+    }
   }
 }

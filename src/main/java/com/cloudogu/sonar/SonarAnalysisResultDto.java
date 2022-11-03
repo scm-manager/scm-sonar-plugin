@@ -39,17 +39,23 @@ import lombok.Setter;
 @Getter
 @Setter
 public class SonarAnalysisResultDto {
-  String status;
-  String revision;
-  SonarProject project;
+  private String revision;
+  private Project project;
+  private QualityGate qualityGate;
 
   @NoArgsConstructor
   @AllArgsConstructor
   @Getter
   @Setter
-  static class SonarProject {
-    String key;
-    String name;
-    String url;
+  static class Project {
+    private String url;
+  }
+
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @Getter
+  @Setter
+  static class QualityGate {
+    private String status;
   }
 }
