@@ -24,6 +24,38 @@
 
 package com.cloudogu.sonar;
 
-class SampleResourceTest {
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+/**
+ * Payload of SonarQube / SonarCloud webhook
+ * @link <a href="https://docs.sonarqube.org/latest/project-administration/webhooks/"/>
+ */
+
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+public class SonarAnalysisResultDto {
+  private String revision;
+  private Project project;
+  private QualityGate qualityGate;
+
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @Getter
+  @Setter
+  static class Project {
+    private String url;
+  }
+
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @Getter
+  @Setter
+  static class QualityGate {
+    private String status;
+  }
 }

@@ -24,18 +24,44 @@
 
 package com.cloudogu.sonar;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
+import com.cloudogu.scm.ci.PermissionCheck;
+import com.cloudogu.scm.ci.cistatus.CIStatusStore;
+import com.cloudogu.scm.ci.cistatus.service.CIStatus;
+import com.cloudogu.scm.ci.cistatus.service.CIStatusService;
+import com.cloudogu.scm.ci.cistatus.service.Status;
+import sonia.scm.repository.Repository;
 
-@Path("v2/sample")
-class SampleResource {
+import javax.inject.Inject;
 
-  @GET
-  @Produces(MediaType.TEXT_PLAIN)
-  public String sample() {
-    return "Sample";
+public class SonarService {
+
+  private static final String NAME = "Sonar";
+
+  private final CIStatusService service;
+
+  @Inject
+  public SonarService(CIStatusService service) {
+    this.service = service;
   }
 
+  void updateCiStatus(Repository repository, SonarAnalysisResultDto resultDto) {
+    PermissionCheck.checkWrite(repository);
+    service.put(CIStatusStore.CHANGESET_STORE, repository, resultDto.getRevision(), createCIStatus(resultDto));
+  }
+
+  private CIStatus createCIStatus(SonarAnalysisResultDto dto) {
+    return new CIStatus(NAME, NAME, NAME, resolveStatus(dto.getQualityGate().getStatus()), dto.getProject().getUrl());
+  }
+
+  private Status resolveStatus(String status) {
+    switch (status) {
+      case "SUCCESS":
+        return Status.SUCCESS;
+      case "ERROR":
+        return Status.FAILURE;
+
+      default:
+        return Status.UNSTABLE;
+    }
+  }
 }
