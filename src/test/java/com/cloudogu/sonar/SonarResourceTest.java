@@ -103,6 +103,11 @@ class SonarResourceTest {
         .contentType(MediaType.APPLICATION_JSON);
     JsonMockHttpResponse response = new JsonMockHttpResponse();
 
+
+
+
+
+
     dispatcher.invoke(request, response);
 
     assertThat(response.getStatus()).isEqualTo(200);
