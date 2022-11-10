@@ -105,6 +105,7 @@ class SonarResourceTest {
 
     dispatcher.invoke(request, response);
 
+
     assertThat(response.getStatus()).isEqualTo(200);
     verify(service).updateCiStatus(eq(repository), argThat(dto -> {
       assertThat(dto.getRevision()).isEqualTo("c739069ec7105e01303e8b3065a81141aad9f129");
@@ -113,7 +114,6 @@ class SonarResourceTest {
       return true;
     }));
   }
-
 
 
 }
