@@ -24,7 +24,6 @@
 
 package com.cloudogu.sonar;
 
-import com.cloudogu.scm.ci.cistatus.service.Status;
 import org.jboss.resteasy.mock.MockHttpRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,6 +45,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -114,4 +114,82 @@ class SonarResourceTest {
     }));
   }
 
+  @Test
+  void shouldProcessRequestWithRepoKey() throws URISyntaxException {
+    Repository repository = RepositoryTestData.create42Puzzle();
+    when(repositoryManager.get(any(NamespaceAndName.class))).thenReturn(repository);
+
+    MockHttpRequest request =
+      MockHttpRequest
+        .post("/v2/sonar")
+        .content(("{\n" +
+          "    \"qualityGate\": { \"status\":\"SUCCESS\" },\n" +
+          "    \"revision\": \"c739069ec7105e01303e8b3065a81141aad9f129\",\n" +
+          "    \"project\": {\n" +
+          "        \"url\": \"https://scm-manager.org/sonarqube/dashboard?id=myproject\"\n" +
+          "    },\n" +
+          "    \"properties\": {\n" +
+          "        \"sonar.analysis.scmm-repo\": \""+ repository.getNamespaceAndName().toString() + "\"\n" +
+          "    }\n" +
+          "}").getBytes())
+        .contentType(MediaType.APPLICATION_JSON);
+    JsonMockHttpResponse response = new JsonMockHttpResponse();
+
+    dispatcher.invoke(request, response);
+
+    assertThat(response.getStatus()).isEqualTo(200);
+    verify(service).updateCiStatus(eq(repository), argThat(dto -> {
+      assertThat(dto.getRevision()).isEqualTo("c739069ec7105e01303e8b3065a81141aad9f129");
+      assertThat(dto.getQualityGate().getStatus()).isEqualTo("SUCCESS");
+      assertThat(dto.getProject().getUrl()).isEqualTo("https://scm-manager.org/sonarqube/dashboard?id=myproject");
+      return true;
+    }));
+  }
+
+  @Test
+  void shouldFailForMissingRepoKey() throws URISyntaxException {
+    MockHttpRequest request =
+      MockHttpRequest
+        .post("/v2/sonar")
+        .content(("{\n" +
+          "    \"qualityGate\": { \"status\":\"SUCCESS\" },\n" +
+          "    \"revision\": \"c739069ec7105e01303e8b3065a81141aad9f129\",\n" +
+          "    \"project\": {\n" +
+          "        \"url\": \"https://scm-manager.org/sonarqube/dashboard?id=myproject\"\n" +
+          "    },\n" +
+          "    \"properties\": {\n" +
+          "    }\n" +
+          "}").getBytes())
+        .contentType(MediaType.APPLICATION_JSON);
+    JsonMockHttpResponse response = new JsonMockHttpResponse();
+
+    dispatcher.invoke(request, response);
+
+    assertThat(response.getStatus()).isEqualTo(400);
+    verify(service, never()).updateCiStatus(any(), any());
+  }
+
+  @Test
+  void shouldFailForInvalidRepoKey() throws URISyntaxException {
+    MockHttpRequest request =
+      MockHttpRequest
+        .post("/v2/sonar")
+        .content(("{\n" +
+          "    \"qualityGate\": { \"status\":\"SUCCESS\" },\n" +
+          "    \"revision\": \"c739069ec7105e01303e8b3065a81141aad9f129\",\n" +
+          "    \"project\": {\n" +
+          "        \"url\": \"https://scm-manager.org/sonarqube/dashboard?id=myproject\"\n" +
+          "    },\n" +
+          "    \"properties\": {\n" +
+          "        \"sonar.analysis.scmm-repo\": \""+ "abc" + "\"\n" +
+          "    }\n" +
+          "}").getBytes())
+        .contentType(MediaType.APPLICATION_JSON);
+    JsonMockHttpResponse response = new JsonMockHttpResponse();
+
+    dispatcher.invoke(request, response);
+
+    assertThat(response.getStatus()).isEqualTo(400);
+    verify(service, never()).updateCiStatus(any(), any());
+  }
 }
