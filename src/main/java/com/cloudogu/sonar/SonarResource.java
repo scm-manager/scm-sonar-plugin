@@ -47,6 +47,7 @@ import javax.ws.rs.core.Response;
 @Path("v2/sonar")
 public class SonarResource {
 
+  private static final String REPO_KEY = "sonar.analysis.scmm-repo";
   private final RepositoryManager repositoryManager;
   private final SonarService service;
 
@@ -78,6 +79,38 @@ public class SonarResource {
   )
   public Response processAnalysis(@PathParam("namespace") String namespace, @PathParam("name") String name, @Valid SonarAnalysisResultDto resultDto) {
     Repository repository = findRepository(namespace, name);
+    service.updateCiStatus(repository, resultDto);
+    return Response.ok().build();
+  }
+
+  @POST
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Path("")
+  @Operation(
+    summary = "Update sonar ci status by repo key",
+    description = "Updates single sonar ci status by repo key \"sonar.analysis.scmm-repo\".",
+    tags = "Sonar Plugin",
+    operationId = "sonar_put_status"
+  )
+  @ApiResponse(responseCode = "204", description = "update success")
+  @ApiResponse(responseCode = "400", description = "Invalid payload")
+  @ApiResponse(responseCode = "401", description = "not authenticated / invalid credentials")
+  @ApiResponse(responseCode = "403", description = "not authorized /  the current user does not have the \"writeCIStatus\" privilege")
+  @ApiResponse(
+    responseCode = "500",
+    description = "internal server error",
+    content = @Content(
+      mediaType = VndMediaType.ERROR_TYPE,
+      schema = @Schema(implementation = ErrorDto.class)
+    )
+  )
+  public Response processAnalysisWithRepoKey(@Valid SonarAnalysisResultDto resultDto) {
+    String repoKey = resultDto.getProperties().get(REPO_KEY);
+    if (repoKey == null || !repoKey.contains("/")) {
+      return Response.status(400).build();
+    }
+    String[] split = repoKey.split("/");
+    Repository repository = findRepository(split[0], split[1]);
     service.updateCiStatus(repository, resultDto);
     return Response.ok().build();
   }

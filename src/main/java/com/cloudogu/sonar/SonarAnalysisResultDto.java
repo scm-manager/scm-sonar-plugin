@@ -29,6 +29,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Payload of SonarQube / SonarCloud webhook
  * @link <a href="https://docs.sonarqube.org/latest/project-administration/webhooks/"/>
@@ -42,6 +45,7 @@ public class SonarAnalysisResultDto {
   private String revision;
   private Project project;
   private QualityGate qualityGate;
+  private Map<String, String> properties = new HashMap<>();
 
   @NoArgsConstructor
   @AllArgsConstructor

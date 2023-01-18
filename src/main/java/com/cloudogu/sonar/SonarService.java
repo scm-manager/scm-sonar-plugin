@@ -56,6 +56,7 @@ public class SonarService {
   private Status resolveStatus(String status) {
     switch (status) {
       case "SUCCESS":
+      case "OK":
         return Status.SUCCESS;
       case "ERROR":
         return Status.FAILURE;

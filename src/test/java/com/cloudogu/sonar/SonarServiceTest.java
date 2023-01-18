@@ -40,6 +40,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import sonia.scm.repository.Repository;
 import sonia.scm.repository.RepositoryTestData;
 
+import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -78,7 +79,8 @@ class SonarServiceTest {
         new SonarAnalysisResultDto(
           "123",
           new SonarAnalysisResultDto.Project("test.url"),
-          new SonarAnalysisResultDto.QualityGate("SUCCESS")
+          new SonarAnalysisResultDto.QualityGate("SUCCESS"),
+          emptyMap()
         )
       );
 
