@@ -24,7 +24,7 @@ Damit der SCM-Manager beim Erhalten des Webhooks erkennt, um welches Repository 
 Der Wert des Schlüssels muss `{{repositoryNamespace}}/{{repositoryName}}` enthalten. 
 
 Beispiel für das Triggern einer SonarCloud Analyse: 
-`sonarqube -Dsonar.organization=scm-manager -Dsonar.branch.name=develop -Dsonar.analysis.scmm-repo=scm-manager-plugins/scm-tagprotection-plugin -Dsonar.branch.target=main`
+`sonarqube -Dsonar.organization=scm-manager -Dsonar.branch.name=develop -Dsonar.analysis.scmm-repo=scm-manager-plugins/scm-tagprotection-plugin`
 
 Weitere Informationen zu den Sonar Webhooks gibt es in der [Dokumentation](https://docs.sonarcloud.io/advanced-setup/webhooks/).
 

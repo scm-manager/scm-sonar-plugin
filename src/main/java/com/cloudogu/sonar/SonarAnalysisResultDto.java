@@ -44,6 +44,7 @@ import java.util.Map;
 public class SonarAnalysisResultDto {
   private String revision;
   private Project project;
+  private Branch branch;
   private QualityGate qualityGate;
   private Map<String, String> properties = new HashMap<>();
 
@@ -52,6 +53,14 @@ public class SonarAnalysisResultDto {
   @Getter
   @Setter
   static class Project {
+    private String url;
+  }
+
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @Getter
+  @Setter
+  static class Branch {
     private String url;
   }
 

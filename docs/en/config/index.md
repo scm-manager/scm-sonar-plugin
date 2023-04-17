@@ -24,7 +24,7 @@ In order for the SCM-Manager to recognize which repository it is when it receive
 The value of the key must contain `{repositoryNamespace}}/{repositoryName}}`.
 
 Example of triggering a SonarCloud analysis:
-`sonarqube -Dsonar.organization=scm-manager -Dsonar.branch.name=develop -Dsonar.analysis.scmm-repo=scm-manager-plugins/scm-tagprotection-plugin -Dsonar.branch.target=main`
+`sonarqube -Dsonar.organization=scm-manager -Dsonar.branch.name=develop -Dsonar.analysis.scmm-repo=scm-manager-plugins/scm-tagprotection-plugin`
 
 For more information on Sonar webhooks, see the [documentation](https://docs.sonarcloud.io/advanced-setup/webhooks/).
 

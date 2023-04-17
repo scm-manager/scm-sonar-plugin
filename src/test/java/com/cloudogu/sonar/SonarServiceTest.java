@@ -73,12 +73,13 @@ class SonarServiceTest {
   @SubjectAware(permissions = "repository:writeCIStatus:id-1")
   class WithPermissions {
     @Test
-    void shouldUpdateNewCIStatus() {
+    void shouldUpdateNewCIStatusWithDefaultUrl() {
       service.updateCiStatus(
         repository,
         new SonarAnalysisResultDto(
           "123",
           new SonarAnalysisResultDto.Project("test.url"),
+          null,
           new SonarAnalysisResultDto.QualityGate("SUCCESS"),
           emptyMap()
         )
@@ -87,6 +88,28 @@ class SonarServiceTest {
       verify(ciStatusService).put(eq(CIStatusStore.CHANGESET_STORE), eq(repository), eq("123"), argThat(ciStatus -> {
         assertThat(ciStatus.getStatus()).isEqualTo(Status.SUCCESS);
         assertThat(ciStatus.getUrl()).isEqualTo("test.url");
+        assertThat(ciStatus.getDisplayName()).isEqualTo("Sonar");
+        assertThat(ciStatus.getName()).isEqualTo("Sonar");
+        return true;
+      }));
+    }
+
+    @Test
+    void shouldUpdateNewCIStatusWithBranchUrl() {
+      service.updateCiStatus(
+        repository,
+        new SonarAnalysisResultDto(
+          "123",
+          new SonarAnalysisResultDto.Project("test.url"),
+          new SonarAnalysisResultDto.Branch("branch.url"),
+          new SonarAnalysisResultDto.QualityGate("SUCCESS"),
+          emptyMap()
+        )
+      );
+
+      verify(ciStatusService).put(eq(CIStatusStore.CHANGESET_STORE), eq(repository), eq("123"), argThat(ciStatus -> {
+        assertThat(ciStatus.getStatus()).isEqualTo(Status.SUCCESS);
+        assertThat(ciStatus.getUrl()).isEqualTo("branch.url");
         assertThat(ciStatus.getDisplayName()).isEqualTo("Sonar");
         assertThat(ciStatus.getName()).isEqualTo("Sonar");
         return true;

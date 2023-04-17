@@ -29,6 +29,7 @@ import com.cloudogu.scm.ci.cistatus.CIStatusStore;
 import com.cloudogu.scm.ci.cistatus.service.CIStatus;
 import com.cloudogu.scm.ci.cistatus.service.CIStatusService;
 import com.cloudogu.scm.ci.cistatus.service.Status;
+import com.google.common.base.Strings;
 import sonia.scm.repository.Repository;
 
 import javax.inject.Inject;
@@ -50,6 +51,9 @@ public class SonarService {
   }
 
   private CIStatus createCIStatus(SonarAnalysisResultDto dto) {
+    if (dto.getBranch() != null && !Strings.isNullOrEmpty(dto.getBranch().getUrl())) {
+      return new CIStatus(NAME, NAME, NAME, resolveStatus(dto.getQualityGate().getStatus()), dto.getBranch().getUrl());
+    }
     return new CIStatus(NAME, NAME, NAME, resolveStatus(dto.getQualityGate().getStatus()), dto.getProject().getUrl());
   }
 
