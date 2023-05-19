@@ -1,4 +1,0 @@
-- type: fixed
-  description: Use specific analysis url
-- type: changed
-  description: Remove deprecated property from docs example
