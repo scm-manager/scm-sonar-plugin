@@ -37,6 +37,7 @@ import javax.inject.Inject;
 public class SonarService {
 
   private static final String NAME = "Sonar";
+  private static final String TYPE_PULL_REQUEST = "PULL_REQUEST";
 
   private final CIStatusService service;
 
@@ -47,7 +48,11 @@ public class SonarService {
 
   void updateCiStatus(Repository repository, SonarAnalysisResultDto resultDto) {
     PermissionCheck.checkWrite(repository);
-    service.put(CIStatusStore.CHANGESET_STORE, repository, resultDto.getRevision(), createCIStatus(resultDto));
+    if (resultDto.getBranch() != null && TYPE_PULL_REQUEST.equals(resultDto.getBranch().getType())) {
+      service.put(CIStatusStore.PULL_REQUEST_STORE, repository, resultDto.getBranch().getName(), createCIStatus(resultDto));
+    } else {
+      service.put(CIStatusStore.CHANGESET_STORE, repository, resultDto.getRevision(), createCIStatus(resultDto));
+    }
   }
 
   private CIStatus createCIStatus(SonarAnalysisResultDto dto) {

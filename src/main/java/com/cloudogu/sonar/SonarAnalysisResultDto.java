@@ -62,6 +62,8 @@ public class SonarAnalysisResultDto {
   @Setter
   static class Branch {
     private String url;
+    private String type;
+    private String name;
   }
 
   @NoArgsConstructor

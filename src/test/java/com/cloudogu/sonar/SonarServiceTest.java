@@ -101,13 +101,35 @@ class SonarServiceTest {
         new SonarAnalysisResultDto(
           "123",
           new SonarAnalysisResultDto.Project("test.url"),
-          new SonarAnalysisResultDto.Branch("branch.url"),
+          new SonarAnalysisResultDto.Branch("branch.url", null, ""),
           new SonarAnalysisResultDto.QualityGate("SUCCESS"),
           emptyMap()
         )
       );
 
       verify(ciStatusService).put(eq(CIStatusStore.CHANGESET_STORE), eq(repository), eq("123"), argThat(ciStatus -> {
+        assertThat(ciStatus.getStatus()).isEqualTo(Status.SUCCESS);
+        assertThat(ciStatus.getUrl()).isEqualTo("branch.url");
+        assertThat(ciStatus.getDisplayName()).isEqualTo("Sonar");
+        assertThat(ciStatus.getName()).isEqualTo("Sonar");
+        return true;
+      }));
+    }
+
+    @Test
+    void shouldUpdateNewCIStatusForPullRequest() {
+      service.updateCiStatus(
+        repository,
+        new SonarAnalysisResultDto(
+          "123",
+          new SonarAnalysisResultDto.Project("test.url"),
+          new SonarAnalysisResultDto.Branch("branch.url", "PULL_REQUEST", "42"),
+          new SonarAnalysisResultDto.QualityGate("SUCCESS"),
+          emptyMap()
+        )
+      );
+
+      verify(ciStatusService).put(eq(CIStatusStore.PULL_REQUEST_STORE), eq(repository), eq("42"), argThat(ciStatus -> {
         assertThat(ciStatus.getStatus()).isEqualTo(Status.SUCCESS);
         assertThat(ciStatus.getUrl()).isEqualTo("branch.url");
         assertThat(ciStatus.getDisplayName()).isEqualTo("Sonar");
