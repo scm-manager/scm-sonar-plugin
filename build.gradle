@@ -38,7 +38,7 @@ scmPlugin {
   description = "Integrates code analysis with SonarCloud / SonarQube"
 
    author = "Cloudogu GmbH"
-   category = "Continous Integration"
+   category = "Continuous Integration"
 
   openapi {
     packages = [
