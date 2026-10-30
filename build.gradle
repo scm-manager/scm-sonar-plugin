@@ -19,13 +19,11 @@ plugins {
 }
 
 dependencies {
-  // define dependencies to other plugins here e.g.:
-   plugin "sonia.scm.plugins:scm-ci-plugin:2.0.0"
-  // optionalPlugin "sonia.scm.plugins:scm-editor-plugin:2.0.0"
+   plugin "sonia.scm.plugins:scm-ci-plugin:4.0.0-SNAPSHOT"
 }
 
 scmPlugin {
-  scmVersion = "3.0.0"
+  scmVersion = "4.0.0-SNAPSHOT"
   displayName = "Sonar"
   description = "Integrates code analysis with SonarCloud / SonarQube"
 
